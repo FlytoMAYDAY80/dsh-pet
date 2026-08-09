@@ -10,7 +10,8 @@
     "smoke": "electron . --smoke",
     "shot": "electron . --shot .shots",
     "dist": "electron-builder --mac",
-    "icon": "python3 scripts/gen_icon.py"
+    "icon": "python3 scripts/gen_icon.py",
+    "publish": "bash scripts/publish.sh"
   },
   "build": {
     "appId": "com.dsh.pet",
@@ -29,7 +30,10 @@
     "mac": {
       "icon": "assets/icon.icns",
       "category": "public.app-category.utilities",
-      "target": ["dmg", "zip"]
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "dmg": {
       "title": "DSH 桌宠",
