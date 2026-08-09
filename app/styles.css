@@ -1,0 +1,170 @@
+/* ============ DSH 桌宠样式 ============ */
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; cursor: default; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: transparent;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+}
+
+#root {
+  position: relative;
+  width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;               /* 气泡与鲸鱼的间距（静默状态） */
+  padding-bottom: 6px;
+}
+/* 喷水状态（working/done）：水柱会顶起，动态拉开间距 */
+#root[data-mode="working"] { gap: 26px; }
+#root[data-mode="done"]    { gap: 26px; }
+#root.dragging #bubble, #root.dragging #stage { cursor: grabbing; }
+
+/* ---------------- 气泡（点击热区：气泡本体） ---------------- */
+#bubble {
+  position: relative;
+  flex-shrink: 0;
+  cursor: grab;
+  width: 252px;
+  padding: 10px 14px 12px;
+  border-radius: 14px;
+  background: rgba(14, 26, 78, 0.92);
+  box-shadow: 0 6px 18px rgba(10, 20, 60, 0.35);
+  color: #fff;
+  backdrop-filter: blur(6px);
+}
+#bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -9px; left: 50%;
+  transform: translateX(-50%);
+  border: 10px solid transparent;
+  border-top-color: rgba(14, 26, 78, 0.92);
+  border-bottom-width: 0;
+}
+#bubble.pop { animation: popIn 0.4s cubic-bezier(0.34, 1.4, 0.64, 1); }
+@keyframes popIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+#bubble-title {
+  font-size: 13px; font-weight: 700;
+  margin-bottom: 3px;
+  letter-spacing: 0.2px;
+}
+#bubble-body {
+  font-size: 11px; line-height: 1.5;
+  color: rgba(255, 255, 255, 0.82);
+  white-space: pre-line;      /* 多会话列表换行显示 */
+  max-height: 108px;          /* 约 6 行，会话多时内部滚动 */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+}
+#bubble-body::-webkit-scrollbar { width: 4px; }
+#bubble-body::-webkit-scrollbar-track { background: transparent; }
+#bubble-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
+
+/* ---------------- 舞台（尺寸由 renderer 按缩放系数动态设置） ---------------- */
+#stage {
+  position: relative;
+  flex-shrink: 0;
+  width: 175px; height: 142px;   /* 默认 67%：262/212 × 0.67 */
+  cursor: grab;
+}
+#whale { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 6px 10px rgba(20, 35, 110, 0.35)); }
+
+/* ---------------- 像素版皮肤 ---------------- */
+#pixel-canvas {
+  display: none;
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 161px; height: 117px;   /* 默认 67%：240/174 × 0.67 */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(0 6px 10px rgba(20, 35, 110, 0.35));
+}
+#root[data-skin="pixel"] #pixel-canvas { display: block; }
+#root[data-skin="pixel"] #whale { display: none; }
+
+/* ---------------- 表情切换 ---------------- */
+.expr-default, .expr-happy, .expr-sleep, .expr-worry, .expr-focus, .expr-off,
+.zzz, .spark, .drop, .sweat {
+  display: none;
+}
+#root[data-mode="starting"] .expr-default { display: block; }
+#root[data-mode="done"]      .expr-happy { display: block; }
+#root[data-mode="idle"]      .expr-sleep { display: block; }
+#root[data-mode="attention"] .expr-worry { display: block; }
+#root[data-mode="working"]   .expr-focus { display: block; }
+#root[data-mode="offline"]   .expr-off   { display: block; }
+#root[data-mode="offline"]   #whale { filter: grayscale(1) drop-shadow(0 6px 10px rgba(20, 35, 110, 0.3)); }
+
+#root[data-mode="working"] .drop,
+#root[data-mode="done"]    .drop { display: block; animation: drop 1.4s ease-in infinite; }
+.d1 { animation-delay: 0s; } .d2 { animation-delay: 0.35s; } .d3 { animation-delay: 0.7s; }
+@keyframes drop {
+  0% { transform: translateY(0); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateY(26px); opacity: 0; }
+}
+
+#root[data-mode="working"] .sweat { display: block; animation: sweat 2.2s ease-in infinite; }
+@keyframes sweat {
+  0%, 60% { transform: translateY(0); opacity: 0; }
+  70% { opacity: 1; }
+  100% { transform: translateY(14px); opacity: 0; }
+}
+
+#root[data-mode="idle"] .zzz { display: block; animation: zzz 2.6s ease-in infinite; }
+.zzz {
+  position: absolute; left: 74px; top: 34px;
+  font-size: 15px; font-weight: 800; color: #3B52E8;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  z-index: 4;
+}
+.z1 { left: 96px; top: 18px; font-size: 12px; animation-delay: 0.2s; }
+.z2 { left: 120px; top: 6px; font-size: 17px; animation-delay: 0.7s; }
+.z3 { left: 142px; top: -4px; font-size: 13px; animation-delay: 1.1s; }
+@keyframes zzz {
+  0% { transform: translateY(6px) scale(0.8); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateY(-12px) scale(1.15); opacity: 0; }
+}
+
+#root[data-mode="done"] .spark { display: block; animation: twinkle 1.6s ease-in-out infinite; }
+.spark {
+  position: absolute; z-index: 4;
+  color: #FFD66B; font-size: 15px;
+  text-shadow: 0 0 6px rgba(255, 214, 107, 0.8);
+}
+.s1 { left: 30px; top: 52px; }
+.s2 { left: 210px; top: 40px; font-size: 12px; animation-delay: 0.3s; }
+.s3 { left: 196px; top: 96px; font-size: 11px; animation-delay: 0.6s; }
+.s4 { left: 40px; top: 130px; font-size: 12px; animation-delay: 0.9s; }
+@keyframes twinkle {
+  0%, 100% { transform: scale(0.6) rotate(0deg); opacity: 0.4; }
+  50% { transform: scale(1.2) rotate(20deg); opacity: 1; }
+}
+
+/* ---------------- 鲸鱼动画 ---------------- */
+#root[data-mode="idle"] #stage,
+#root[data-mode="done"] #stage { animation: bob 3.2s ease-in-out infinite; }
+#root[data-mode="working"] #stage { animation: bob 2.2s ease-in-out infinite; }
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+#root[data-mode="working"] .tail,
+#root[data-mode="done"]    .tail { animation: wag 1.6s ease-in-out infinite; transform-origin: 188px 104px; }
+@keyframes wag {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(7deg); }
+}
+
+#root[data-mode="attention"] .tail { animation: wag 0.9s ease-in-out infinite; transform-origin: 188px 104px; }

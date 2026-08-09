@@ -1,0 +1,10 @@
+node_modules/
+.cache/
+dist/
+.DS_Store
+*.log
+__pycache__/
+*.pyc
+pixel-preview/
+.pixel-design/
+.shots/

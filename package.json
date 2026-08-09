@@ -1,0 +1,43 @@
+{
+  "name": "dsh-pet",
+  "productName": "DSH 桌宠",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness 桌宠：悬浮在桌面上的小鲸鱼，实时反映会话状态（工作中 / 需要确认 / 任务完成 / 空闲），支持零代码定制素材",
+  "author": "FlytoMAYDAY80",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "smoke": "electron . --smoke",
+    "shot": "electron . --shot .shots",
+    "dist": "electron-builder --mac",
+    "icon": "python3 scripts/gen_icon.py"
+  },
+  "build": {
+    "appId": "com.dsh.pet",
+    "productName": "DSH 桌宠",
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**",
+      "custom/**",
+      "assets/**",
+      "产品说明.md",
+      "CHANGELOG.md",
+      "LICENSE",
+      "README.md"
+    ],
+    "mac": {
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.utilities",
+      "target": ["dmg", "zip"]
+    },
+    "dmg": {
+      "title": "DSH 桌宠",
+      "icon": "assets/icon.icns"
+    }
+  },
+  "devDependencies": {
+    "electron": "41.7.1",
+    "electron-builder": "^24.13.3"
+  }
+}

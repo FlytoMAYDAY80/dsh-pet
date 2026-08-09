@@ -1,0 +1,8 @@
+PASS default: 40x29 RGBA, transparent background, one connected sprite
+PASS working: 40x29 RGBA, transparent background, one connected sprite
+PASS attention: 40x29 RGBA, transparent background, one connected sprite
+PASS done: 40x29 RGBA, transparent background, one connected sprite
+PASS idle: 40x29 RGBA, transparent background, one connected sprite
+PASS offline: 40x29 RGBA, transparent background, one connected sprite
+PASS reference fidelity: 16x16-block extraction plus explicit one-pixel restoration of the source fin
+PASS invariants: states differ only inside the fixed face patch; working adds water; offline recolors

@@ -1,0 +1,9 @@
+PASS default: 80x58 RGBA, transparent background, one connected sprite
+PASS working: 80x58 RGBA, transparent background, one connected sprite
+PASS attention: 80x58 RGBA, transparent background, one connected sprite
+PASS done: 80x58 RGBA, transparent background, one connected sprite
+PASS idle: 80x58 RGBA, transparent background, one connected sprite
+PASS offline: 80x58 RGBA, transparent background, one connected sprite
+PASS density: every grid cell maps to one exact 8x8 source block
+PASS color: tail uses the same body blue or offline gray
+PASS invariants: shared body; only face, working water, and offline palette differ

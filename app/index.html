@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>DSH 桌宠</title>
+</head>
+<body>
+  <div id="root" data-mode="starting">
+
+    <!-- 状态气泡 -->
+    <div id="bubble">
+      <div id="bubble-title">启动中…</div>
+      <div id="bubble-body">正在连接 DSH</div>
+    </div>
+
+    <!-- 鲸鱼舞台 -->
+    <div id="stage">
+      <canvas id="pixel-canvas" width="480" height="348"></canvas>
+
+      <span class="zzz z1">z</span>
+      <span class="zzz z2">z</span>
+      <span class="zzz z3">z</span>
+      <span class="spark s1">✦</span>
+      <span class="spark s2">✦</span>
+      <span class="spark s3">✦</span>
+      <span class="spark s4">✦</span>
+
+      <svg id="whale" viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#5B7BFF" />
+            <stop offset="100%" stop-color="#3B52E8" />
+          </linearGradient>
+          <linearGradient id="bellyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#EFF3FF" />
+            <stop offset="100%" stop-color="#CBD7FF" />
+          </linearGradient>
+        </defs>
+
+        <!-- 尾巴 -->
+        <g class="tail">
+          <path d="M186 94 C 214 54 240 52 242 58 C 228 84 230 102 232 120 C 230 140 234 150 240 158 C 216 156 200 140 186 114 C 192 106 190 98 186 94 Z"
+                fill="url(#bodyGrad)" />
+        </g>
+
+        <!-- 身体 / 肚皮 / 鱼鳍 -->
+        <ellipse cx="110" cy="106" rx="82" ry="58" fill="url(#bodyGrad)" />
+        <ellipse cx="98" cy="130" rx="54" ry="36" fill="url(#bellyGrad)" />
+        <path d="M84 108 C 64 118 62 140 74 146 C 92 142 102 124 96 112 Z" fill="url(#bodyGrad)" opacity="0.92" />
+
+        <!-- 喷水（工作中/完成时） -->
+        <g class="spout">
+          <ellipse cx="118" cy="50" rx="5" ry="3" fill="#9DB4FF" opacity="0.85" />
+          <ellipse class="drop d1" cx="112" cy="36" rx="2.6" ry="4.2" fill="#9DB4FF" />
+          <ellipse class="drop d2" cx="120" cy="24" rx="2.4" ry="4" fill="#A9BEFF" />
+          <ellipse class="drop d3" cx="128" cy="34" rx="2.4" ry="4" fill="#9DB4FF" />
+        </g>
+
+        <!-- 汗水（工作中） -->
+        <path class="sweat" d="M106 50 C 106 56 112 60 112 66 C 112 72 106 74 106 74 C 106 74 100 72 100 66 C 100 60 106 56 106 50 Z" fill="#9DB4FF" opacity="0.9" />
+
+        <!-- ============ 表情组（按状态切换显示） ============ -->
+        <!-- 默认：普通圆眼 -->
+        <g class="expr-default">
+          <circle cx="74" cy="86" r="14" fill="#FFFFFF" stroke="#24409C" stroke-width="2" />
+          <circle cx="78" cy="88" r="6.5" fill="#10205E" />
+          <circle cx="80.5" cy="85" r="2" fill="#FFFFFF" />
+        </g>
+        <!-- 完成：开心眯眼 ^ ^ -->
+        <g class="expr-happy">
+          <path d="M62 90 Q 74 78 86 90" fill="none" stroke="#10205E" stroke-width="4.5" stroke-linecap="round" />
+          <path d="M60 112 Q 72 124 86 110" fill="none" stroke="#10205E" stroke-width="4" stroke-linecap="round" />
+        </g>
+        <!-- 空闲：睡觉 -->
+        <g class="expr-sleep">
+          <path d="M64 88 Q 74 84 84 88" fill="none" stroke="#10205E" stroke-width="4.5" stroke-linecap="round" />
+          <path d="M70 112 Q 74 114 78 112" fill="none" stroke="#10205E" stroke-width="3" stroke-linecap="round" />
+        </g>
+        <!-- 需要确认：瞪大眼睛 + 眉毛 + o 嘴 -->
+        <g class="expr-worry">
+          <path d="M58 70 Q 70 62 84 68" fill="none" stroke="#10205E" stroke-width="4" stroke-linecap="round" />
+          <circle cx="74" cy="86" r="16" fill="#FFFFFF" stroke="#24409C" stroke-width="2" />
+          <circle cx="79" cy="89" r="7.5" fill="#10205E" />
+          <circle cx="81.5" cy="86" r="2.2" fill="#FFFFFF" />
+          <circle cx="74" cy="114" r="5" fill="#10205E" />
+        </g>
+        <!-- 工作中：专注半眯眼 + 眉毛 -->
+        <g class="expr-focus">
+          <path d="M60 72 Q 72 66 86 70" fill="none" stroke="#10205E" stroke-width="4" stroke-linecap="round" />
+          <circle cx="74" cy="86" r="14" fill="#FFFFFF" stroke="#24409C" stroke-width="2" />
+          <circle cx="78" cy="88" r="6.5" fill="#10205E" />
+          <path d="M58 78 Q 74 70 90 79 L 90 88 L 58 88 Z" fill="#3B52E8" opacity="0.95" />
+        </g>
+        <!-- 离线：X X 眼 -->
+        <g class="expr-off">
+          <path d="M64 80 L 84 92 M84 80 L 64 92" stroke="#10205E" stroke-width="4.5" stroke-linecap="round" />
+          <path d="M64 116 Q 74 108 84 116" fill="none" stroke="#10205E" stroke-width="4" stroke-linecap="round" />
+        </g>
+
+        <!-- 腮红 -->
+        <ellipse cx="56" cy="104" rx="7" ry="4" fill="#FFA8C5" opacity="0.55" />
+        <ellipse cx="92" cy="106" rx="7" ry="4" fill="#FFA8C5" opacity="0.55" />
+      </svg>
+    </div>
+
+  </div>
+  <script src="pixel-sprites.js"></script>
+  <script src="pixel.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>
