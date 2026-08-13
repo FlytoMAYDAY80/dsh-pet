@@ -1,6 +1,6 @@
 <h1 align="center">
   <img src="assets/icon.png" width="64" alt="DSH 桌宠 icon" valign="middle" />
-  DSH 桌宠
+  DSH 有声桌宠
 </h1>
 
 <p align="center">
