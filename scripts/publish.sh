@@ -40,5 +40,5 @@ ASSETS=("$DMG")
 gh release create "$TAG" "${ASSETS[@]}" --title "$TAG" \
   --notes "**DSH 桌宠 $TAG**：见 CHANGELOG.md 了解本次变更。" || \
   gh release create "$TAG" "${ASSETS[@]}" --title "$TAG" --notes "覆盖发布 $TAG" 2>/dev/null || true
-echo "✅ Release 已发布: https://github.com/dsh-external/dsh-pet/releases/tag/$TAG"
+echo "✅ Release 已发布: https://github.com/FlytoMAYDAY80/dsh-pet/releases/tag/$TAG"
 echo "🎉 完成！hub 索引将在 2 小时内自动刷新。"
