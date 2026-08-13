@@ -2,6 +2,8 @@
 
 **悬浮在桌面上的 DeepSeek 小鲸鱼 —— 不打开 DSH 页面，也能实时感知会话状态。**
 
+> 📦 本项目随 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 发布而开源（原托管于 `dsh-external` 组织仓库，现以个人账号仓库作为公开源）。欢迎使用、定制与贡献，开源协议见 [LICENSE](LICENSE)。
+
 ![五种状态预览](docs/contact-sheet.png)
 
 DSH 桌宠是一只独立的桌面应用：当你在浏览器、IDE、文档里工作时，鲸鱼始终悬浮在桌面一角，用表情、气泡和音效告诉你——**有会话在跑、需要你去审批、任务做完了**。把"任务状态"从需要主动查看的页面，变成余光即得的实时信号。
