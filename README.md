@@ -49,8 +49,8 @@ DSH 桌宠是一只独立的桌面应用：当你在浏览器、IDE、文档里�
 
 | 平台 | 安装包 | 说明 |
 |---|---|---|
-| macOS Apple Silicon | `DSH 桌宠-<版本>-arm64.dmg` | 双击打开，把鲸鱼拖入 Applications |
-| macOS Apple Silicon | `DSH 桌宠-<版本>-arm64-mac.zip` | 便携版，解压即用；删文件夹即卸载 |
+| macOS Apple Silicon | `dsh-pet-<版本>-arm64.dmg` | 双击打开，把鲸鱼拖入 Applications |
+| macOS Apple Silicon | `dsh-pet-<版本>-arm64-mac.zip` | 便携版，解压即用；删文件夹即卸载 |
 
 **方式二：从源码运行** — 需要 [Node.js](https://nodejs.org) 18+ 与 [pnpm](https://pnpm.io)：
 
