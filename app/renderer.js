@@ -61,12 +61,15 @@ function scheduleDraw() {
   drawPixel(performance.now())
 }
 
+let lastAttentionCount = 0
+
 window.pet.onState((s) => {
   currentMode = s.mode
   root.dataset.mode = s.mode
   elTitle.textContent = s.bubble.title
   elBody.textContent = s.bubble.body
 
+  const attentionCount = (s.attention || []).length
   // 仅在状态(mode)真正变化时才让气泡弹一下 + 播放对应提示音；
   // 同一状态下的轮询刷新不再触发动画，避免持续闪动
   if (s.mode !== lastMode) {
@@ -76,7 +79,14 @@ window.pet.onState((s) => {
     void elBubble.offsetWidth
     elBubble.classList.add('pop')
     scheduleDraw() // 像素皮肤：状态变化时重绘
+  } else if (s.mode === 'attention' && attentionCount > lastAttentionCount) {
+    // 已在「需要确认」状态时又来了新的待确认项：再次响铃提醒（如新审批/新提问）
+    playSound('attention')
+    elBubble.classList.remove('pop')
+    void elBubble.offsetWidth
+    elBubble.classList.add('pop')
   }
+  lastAttentionCount = attentionCount
 })
 
 window.pet.onSoundToggle((v) => {

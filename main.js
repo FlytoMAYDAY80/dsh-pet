@@ -466,11 +466,30 @@ function playSoundFile(mode) {
     path.join(__dirname, 'app', 'sounds', `${base}.mp4`),
   ]
   const f = candidates.find((p) => fs.existsSync(p))
-  if (!f) return
+  if (!f) {
+    console.warn(`[pet] 提示音文件缺失: ${base}（已查找: ${candidates.join(', ')}）`)
+    return
+  }
   if (afplayProc && !afplayProc.killed) afplayProc.kill() // 防止重叠播放
-  console.log(`[pet] 播放提示音: ${f}`)
-  afplayProc = spawn('afplay', [asarPlayable(f)])
-  afplayProc.on('error', () => { /* 播放器不可用时静默 */ })
+  const target = asarPlayable(f)
+  console.log(`[pet] 播放提示音: ${target}`)
+  const proc = spawn('afplay', [target])
+  afplayProc = proc
+  proc.on('error', (err) => {
+    console.warn(`[pet] afplay 启动失败（${base}）: ${err?.message ?? err}`)
+  })
+  proc.stderr?.on('data', (d) => console.warn(`[pet] afplay stderr: ${String(d).trim()}`))
+  proc.on('exit', (code) => {
+    if (afplayProc === proc) afplayProc = null
+    if (!proc.killed && code !== 0) console.warn(`[pet] afplay 退出码 ${code}（${base}）`)
+    cleanupSoundTemp(target)
+  })
+}
+
+// 播放结束后清理解压到临时目录的音效，避免残留
+function cleanupSoundTemp(f) {
+  if (!f.startsWith(app.getPath('temp'))) return
+  try { fs.unlinkSync(f) } catch { /* ignore */ }
 }
 
 // 打包模式（app.asar）下音效归档在 asar 内，外部 afplay 无法读取该路径
