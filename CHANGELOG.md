@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+（无）
+
+## [v0.1.1] - 2026-08-17
+
 ### 修复
 - 审批/提问音效失效：DSH 0.1.0-rc.6 起事件通道（events.mux / events.host）只接受
   WebSocket 升级（普通 GET 返回 426），桌宠原 SSE 客户端连不上导致审批事件收不到。
