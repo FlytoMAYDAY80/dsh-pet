@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+### 修复
+- 审批/提问音效失效：DSH 0.1.0-rc.6 起事件通道（events.mux / events.host）只接受
+  WebSocket 升级（普通 GET 返回 426），桌宠原 SSE 客户端连不上导致审批事件收不到。
+  改为 WebSocket 连接（帧格式不变，断线自动重连逻辑保留）
+- 打包版（app.asar）音效无声：afplay 无法读取 asar 归档内路径（AudioFileOpen failed），
+  播放前先解压音效到临时目录
+- 提问跟踪失效：question/requested 帧载荷没有 questionRpcId 字段（唯一标识在
+  ServerRequest 信封的 rpcId 上），原实现用它做 key 导致多个提问互相覆盖、
+  且 question/resolved 永远匹配不上（待决提问残留 30 分钟才过期）。
+  改为用信封 rpcId 做 key，与官方客户端 q:<rpcId> 语义一致
+- 完成提示音不触发：turn/end 事件的 reason 位于 event.data.reason 而非事件顶层，
+  修正判断层级后，会话完成时正常播报完成音
+
 ### 发布准备（v0.1.0 候选）
 - 补齐发布资产：LICENSE、CHANGELOG、README 首页、应用图标、打包配置、docs 截图素材
 - 新增「自定义素材包」机制：`custom/` 目录零代码定制（像素图案/配色/音效），含参考图生成脚本 `scripts/ref_to_sprites.py`

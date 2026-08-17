@@ -3,7 +3,7 @@
 /**
  * DSH 桌宠主进程
  * - 透明无边框置顶悬浮窗 + 托盘
- * - DSH 状态引擎：轮询 session.list + SSE /api/events.mux（实时推送审批/提问/队列）
+ * - DSH 状态引擎：轮询 session.list + WebSocket /api/events.mux（实时推送审批/提问/队列）
  * - 状态机：offline > attention > working > done > idle
  */
 
@@ -117,60 +117,53 @@ async function pollSessions() {
 }
 
 // ---------------------------------------------------------------------------
-// SSE：/api/events.mux（审批/提问/队列推送）+ /api/events.host（running 翻转即时推送）
-// 统一连接器：断线自动重连
+// WebSocket：/api/events.mux（审批/提问/队列推送）+ /api/events.host（running 翻转即时推送）
+// 说明：DSH 0.1.0-rc.6 起事件通道只接受 WebSocket 升级（普通 GET 返回 426
+// "upgrade required"），SSE 客户端会连不上。统一连接器：断线自动重连
 // ---------------------------------------------------------------------------
-const sseState = {} // path -> { timer, abort }
+const wsState = {} // path -> { timer, ws }
 
-function connectSSE(path, onFrame, onOpen) {
-  const st = sseState[path] ?? (sseState[path] = { timer: null, abort: null })
+function connectWS(path, onFrame, onOpen) {
+  const st = wsState[path] ?? (wsState[path] = { timer: null, ws: null })
   if (st.timer) { clearTimeout(st.timer); st.timer = null }
-  st.abort?.abort()
-  const ctrl = new AbortController()
-  st.abort = ctrl
-
-  fetch(`${DSH_URL}${path}`, { signal: ctrl.signal })
-    .then(async (res) => {
-      if (!res.ok || !res.body) throw new Error(`${path} HTTP ${res.status}`)
-      onOpen?.()
-      const reader = res.body.getReader()
-      const dec = new TextDecoder()
-      let buf = ''
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        buf += dec.decode(value, { stream: true })
-        let idx
-        while ((idx = buf.indexOf('\n\n')) !== -1) {
-          const block = buf.slice(0, idx)
-          buf = buf.slice(idx + 2)
-          for (const line of block.split('\n')) {
-            if (!line.startsWith('data: ')) continue
-            let frame
-            try { frame = JSON.parse(line.slice(6)) } catch { continue }
-            onFrame(frame.payload || frame)
-          }
-        }
-      }
-      throw new Error(`${path} stream ended`)
-    })
-    .catch((err) => {
-      if (ctrl.signal.aborted) return
-      if (SMOKE) console.log(`[pet-smoke] sse error ${path}: ${err?.message}`)
-      st.timer = setTimeout(() => connectSSE(path, onFrame, onOpen), 3000)
-    })
+  st.ws?.close()
+  const url = `${DSH_URL.replace(/^http/, 'ws')}${path}`
+  let ws
+  try {
+    ws = new WebSocket(url)
+  } catch (err) {
+    st.timer = setTimeout(() => connectWS(path, onFrame, onOpen), 3000)
+    return
+  }
+  st.ws = ws
+  ws.onopen = () => {
+    if (SMOKE) console.log(`[pet-smoke] ws open ${path}`)
+    onOpen?.()
+  }
+  ws.onmessage = (ev) => {
+    let frame
+    try { frame = JSON.parse(ev.data) } catch { return }
+    // rpcId 是 ServerRequest 信封字段：question/requested 的唯一标识
+    // （与服务端 question/resolved 的 questionRpcId 对应），必须透传给处理层
+    onFrame(frame.payload || frame, frame.rpcId)
+  }
+  ws.onerror = () => { /* 统一由 onclose 处理重连 */ }
+  ws.onclose = () => {
+    if (st.ws !== ws) return // 已被新连接取代（主动重连/关闭）
+    st.timer = setTimeout(() => connectWS(path, onFrame, onOpen), 3000)
+  }
 }
 
 // mux：重连时清空待决审批/提问，服务端会重放，实现天然同步
 function connectMux() {
   pet.pendingApprovals.clear()
   pet.pendingQuestions.clear()
-  connectSSE('/api/events.mux', handleFrame)
+  connectWS('/api/events.mux', handleFrame)
 }
 
 // host：running 翻转即时推送（会话开始/结束干活），解决轮询延迟
 function connectHost() {
-  connectSSE('/api/events.host', handleHostFrame, () => {
+  connectWS('/api/events.host', handleHostFrame, () => {
     // 重连后补一次轮询基线，防止漏掉连接期间的翻转
     pollSessions()
   })
@@ -198,7 +191,7 @@ function handleHostFrame(p) {
   }
 }
 
-function handleFrame(p) {
+function handleFrame(p, rpcId) {
   switch (p?.type) {
     case 'approval/requested':
       pet.pendingApprovals.set(p.approvalId, {
@@ -212,12 +205,15 @@ function handleFrame(p) {
       emit()
       break
     case 'question/requested':
-      pet.pendingQuestions.set(p.questionRpcId, {
+      // 注意：requested 帧的载荷里没有 questionRpcId，唯一标识在 ServerRequest
+      // 信封的 rpcId 上（与 question/resolved 帧的 questionRpcId 对应），
+      // 用 rpcId 做 key 才能多提问并存、且能被 resolved 精确清除
+      pet.pendingQuestions.set(rpcId || p.questionRpcId, {
         sessionId: p.sessionId,
         text: p.questions?.[0]?.question || '',
         requestedAt: Date.now(),
       })
-      if (SMOKE) console.log(`[pet-smoke] question/requested: ${pet.pendingQuestions.get(p.questionRpcId).text}`)
+      if (SMOKE) console.log(`[pet-smoke] question/requested(${rpcId}): ${pet.pendingQuestions.get(rpcId || p.questionRpcId)?.text}`)
       emit()
       break
     case 'question/resolved':
@@ -230,7 +226,8 @@ function handleFrame(p) {
       break
     case 'session/event':
       // 一轮回答完成（turn/end completed）：语音播报完成提示
-      if (p.event?.type === 'turn/end' && p.event.reason?.kind === 'completed') {
+      // （rc.6 帧格式：event.data.reason.kind，reason 在 data 内而非事件顶层）
+      if (p.event?.type === 'turn/end' && p.event.data?.reason?.kind === 'completed') {
         playSoundFile('done')
       }
       break
@@ -472,8 +469,23 @@ function playSoundFile(mode) {
   if (!f) return
   if (afplayProc && !afplayProc.killed) afplayProc.kill() // 防止重叠播放
   console.log(`[pet] 播放提示音: ${f}`)
-  afplayProc = spawn('afplay', [f])
+  afplayProc = spawn('afplay', [asarPlayable(f)])
   afplayProc.on('error', () => { /* 播放器不可用时静默 */ })
+}
+
+// 打包模式（app.asar）下音效归档在 asar 内，外部 afplay 无法读取该路径
+// （实测报 AudioFileOpen failed）。用 Electron 的 fs 解压到临时目录再播。
+function asarPlayable(f) {
+  if (!f.includes('app.asar')) return f
+  try {
+    const tmp = path.join(app.getPath('temp'), `pet-sound-${Date.now()}-${path.basename(f)}`)
+    fs.copyFileSync(f, tmp) // Electron 的 fs 可读 asar 内文件
+    console.log(`[pet] 音效解压到临时目录: ${tmp}`)
+    return tmp
+  } catch (e) {
+    console.log(`[pet] 音效解压失败，回退原路径: ${e?.message ?? e}`)
+    return f
+  }
 }
 
 ipcMain.on('play-sound', (_e, mode) => playSoundFile(mode))

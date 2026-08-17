@@ -5,8 +5,8 @@
 # ============================================================
 cd "$(dirname "$0")"
 
-# 已运行的实例直接提示（单实例锁）
-if pgrep -f "dsh-pet/node_modules/.pnpm/electron@41" > /dev/null; then
+# 已运行的实例直接提示（单实例锁；匹配 pnpm/npm 任意 Electron 版本布局）
+if pgrep -f "dsh-pet.*Electron\.app/Contents/MacOS/Electron" > /dev/null; then
   echo "🐋 桌宠已在运行中（右下角应该能看到它）"
   exit 0
 fi

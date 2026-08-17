@@ -25,10 +25,10 @@ DSH 桌宠是一只独立的桌面应用：当你在浏览器、IDE、文档里�
 
 - **离屏状态感知**：独立置顶悬浮窗，跨全屏 App 可见，不打开 DSH 也能看见状态
 - **人工介入零遗漏**：「需要确认」（审批/提问）最高优先级呈现 + 专属音效，不会错过需要你的节点
-- **毫秒级实时**：双 SSE 通道（审批/提问推送 + 运行状态翻转推送），状态变化即时响应
+- **毫秒级实时**：双 WebSocket 通道（审批/提问推送 + 运行状态翻转推送），状态变化即时响应
 - **跨会话聚合**：多会话并行时气泡逐行列出每个会话，数量再多也可滚动查看
 - **低打扰**：只在状态真正变化时动画/发声，不刷存在感
-- **对 DSH 零侵入**：纯只读 HTTP/SSE 接口，不写入任何数据，卸载即消失
+- **对 DSH 零侵入**：纯只读 HTTP/WebSocket 接口，不写入任何数据，卸载即消失
 - **零代码定制**：`custom/` 目录一键换图案、配色、音效（见下方"定制"）
 
 ## 📊 五种状态
@@ -98,12 +98,12 @@ python3 scripts/ref_to_sprites.py <你的参考图.png>
 右键鲸鱼 → 菜单里打开"音效"，并确认系统音量；「需要确认」与「任务完成」各有专属音效。
 
 **Q：桌宠会不会把数据传到云端？**
-不会。桌宠只读取本地 DSH 接口（HTTP/SSE），无任何云端上报，卸载即消失。
+不会。桌宠只读取本地 DSH 接口（HTTP/WebSocket），无任何云端上报，卸载即消失。
 
 ## 🛠️ 开发与自检
 
 ```bash
-pnpm smoke        # 状态引擎冒烟测试（连接/轮询/SSE/状态推导）
+pnpm smoke        # 状态引擎冒烟测试（连接/轮询/WebSocket/状态推导）
 pnpm shot         # 两种皮肤 × 5 状态截图到 .shots/
 python3 scripts/verify_pixel_src.py   # 素材规格与参考图一致性校验
 python3 scripts/gen_icon.py           # 重新生成应用图标
@@ -112,7 +112,7 @@ python3 scripts/gen_icon.py           # 重新生成应用图标
 ## 📁 目录结构
 
 ```
-main.js          主进程：窗口/托盘 + DSH 状态引擎（轮询 + 双 SSE）+ 素材包加载
+main.js          主进程：窗口/托盘 + DSH 状态引擎（轮询 + 双 WebSocket）+ 素材包加载
 preload.js       contextBridge IPC
 app/             渲染层：index.html + styles.css + renderer.js + 像素素材 + 音效
 custom/          自定义素材包（用户定制入口）
@@ -142,7 +142,7 @@ DSH 桌宠 (dsh-pet) is a standalone desktop app: a small whale floats in a corn
 - **Download**: [GitHub Releases](https://github.com/FlytoMAYDAY80/dsh-pet/releases/latest) (macOS Apple Silicon, DMG or ZIP)
 - **Run from source**: `pnpm install && pnpm start` (Node.js 18+, pnpm)
 - **Customize**: drop your own sprites/colors/sounds into `custom/`, restart to apply
-- **Privacy**: reads only the local DSH HTTP/SSE interface, no cloud upload
+- **Privacy**: reads only the local DSH HTTP/WebSocket interface, no cloud upload
 - **License**: MIT
 
 *DSH 桌宠只读取本地 DSH 接口，无任何云端上报。*
