@@ -1,11 +1,5 @@
-<h1 align="center">
-  <img src="assets/icon.png" width="64" alt="DSH 桌宠 icon" valign="middle" />
-  DSH 有声桌宠
-</h1>
-
 <p align="center">
-  <strong>悬浮在桌面上的 DeepSeek 小鲸鱼 —— 不打开 DSH 页面，也能实时感知会话状态。</strong><br/>
-  独立置顶悬浮窗，跨全屏 App 可见：有会话在跑、需要你审批、任务做完了，余光即得。
+  <img src="docs/hero-v2.png" width="100%" alt="DSH PET — 图像、文字与音效三重状态提醒" />
 </p>
 
 <p align="center">
