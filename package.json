@@ -10,6 +10,7 @@
     "smoke": "electron . --smoke",
     "shot": "electron . --shot .shots",
     "dist": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
     "icon": "python3 scripts/gen_icon.py",
     "publish": "bash scripts/publish.sh"
   },
@@ -19,6 +20,7 @@
     "files": [
       "main.js",
       "preload.js",
+      "tray-icon.js",
       "app/**",
       "custom/**",
       "assets/**",
@@ -34,6 +36,17 @@
         "dmg",
         "zip"
       ]
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        "nsis",
+        "zip"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     },
     "dmg": {
       "title": "DSH 桌宠",

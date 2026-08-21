@@ -8,23 +8,22 @@
 <body>
   <div id="root" data-mode="starting">
 
-    <!-- 状态气泡 -->
+    <!-- 状态气泡（codex 风：深色圆角 + 状态点 + 会话列表 + 可折叠） -->
     <div id="bubble">
-      <div id="bubble-title">启动中…</div>
+      <div id="bubble-head">
+        <span id="bubble-dot" class="dot"></span>
+        <div id="bubble-title">启动中…</div>
+      </div>
       <div id="bubble-body">正在连接 DSH</div>
+      <div id="session-list"></div>
+      <button id="fold-btn" title="收起会话列表" aria-label="收起会话列表"></button>
+      <button id="fold-count" title="展开会话列表" aria-label="展开会话列表">0</button>
     </div>
 
     <!-- 鲸鱼舞台 -->
     <div id="stage">
       <canvas id="pixel-canvas" width="480" height="348"></canvas>
 
-      <span class="zzz z1">z</span>
-      <span class="zzz z2">z</span>
-      <span class="zzz z3">z</span>
-      <span class="spark s1">✦</span>
-      <span class="spark s2">✦</span>
-      <span class="spark s3">✦</span>
-      <span class="spark s4">✦</span>
 
       <svg id="whale" viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -48,17 +47,6 @@
         <ellipse cx="110" cy="106" rx="82" ry="58" fill="url(#bodyGrad)" />
         <ellipse cx="98" cy="130" rx="54" ry="36" fill="url(#bellyGrad)" />
         <path d="M84 108 C 64 118 62 140 74 146 C 92 142 102 124 96 112 Z" fill="url(#bodyGrad)" opacity="0.92" />
-
-        <!-- 喷水（工作中/完成时） -->
-        <g class="spout">
-          <ellipse cx="118" cy="50" rx="5" ry="3" fill="#9DB4FF" opacity="0.85" />
-          <ellipse class="drop d1" cx="112" cy="36" rx="2.6" ry="4.2" fill="#9DB4FF" />
-          <ellipse class="drop d2" cx="120" cy="24" rx="2.4" ry="4" fill="#A9BEFF" />
-          <ellipse class="drop d3" cx="128" cy="34" rx="2.4" ry="4" fill="#9DB4FF" />
-        </g>
-
-        <!-- 汗水（工作中） -->
-        <path class="sweat" d="M106 50 C 106 56 112 60 112 66 C 112 72 106 74 106 74 C 106 74 100 72 100 66 C 100 60 106 56 106 50 Z" fill="#9DB4FF" opacity="0.9" />
 
         <!-- ============ 表情组（按状态切换显示） ============ -->
         <!-- 默认：普通圆眼 -->
