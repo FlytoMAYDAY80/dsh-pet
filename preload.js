@@ -11,7 +11,10 @@ contextBridge.exposeInMainWorld('pet', {
   onTestSound: (cb) => ipcRenderer.on('test-sound', () => cb()),
   onCustomSprites: (cb) => ipcRenderer.on('custom-sprites', (_e, data) => cb(data)),
   openGui: () => ipcRenderer.send('pet-click'),
+  dragStart: () => ipcRenderer.send('drag-start'),
+  dragEnd: () => ipcRenderer.send('drag-end'),
+  setClickable: (v) => ipcRenderer.send('pet-clickable', v),
+  reportHitAreas: (areas) => ipcRenderer.send('pet-hit-areas', areas),
   playSound: (mode) => ipcRenderer.send('play-sound', mode),
-  dragMove: (dx, dy) => ipcRenderer.send('drag-move', { dx, dy }),
   contextMenu: () => ipcRenderer.send('pet-context-menu'),
 })
