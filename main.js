@@ -407,6 +407,7 @@ function setPetScale(next) {
 }
 
 function createWindow() {
+  lastIgnoreMouse = null // 重建窗口时清除旧的命中状态
   mainWindow = new BrowserWindow({
     width: 280,
     height: 340,
@@ -580,6 +581,33 @@ ipcMain.on('drag-move', (_e, { dx, dy }) => {
 // 不能用 tray.popUpContextMenu（那会把菜单弹到屏幕顶部菜单栏）
 ipcMain.on('pet-context-menu', () => {
   buildMenu().popup({ window: mainWindow ?? undefined })
+})
+
+// ---------------------------------------------------------------------------
+// 命中 / 点击穿透（仅此层改动，别处不动）
+// 渲染进程按「当前帧鲸鱼可见像素轮廓 + 气泡可见矩形」上报是否可交互。
+// 仅当指针落在可交互区时才让窗口接收鼠标；其余透明空白置为 click-through，
+// 事件透传后方窗口（不抢占点击/拖拽/滚轮/悬停）。
+// forward: true = 穿透状态下仍把 mousemove 转发给页面，以便指针移回交互区时恢复命中。
+// ---------------------------------------------------------------------------
+let lastIgnoreMouse = null
+const HIT_DEBUG = !!process.env.DSH_PET_DEBUG_HIT
+
+function applyIgnoreMouse(interactive) {
+  if (!mainWindow || mainWindow.isDestroyed()) return
+  const ignore = !interactive
+  if (ignore === lastIgnoreMouse) return // 状态未变则不反复调用
+  lastIgnoreMouse = ignore
+  try {
+    mainWindow.setIgnoreMouseEvents(ignore, { forward: true })
+    if (HIT_DEBUG) console.log(`[pet-hit] interactive=${interactive} ignoreMouse=${ignore}`)
+  } catch (e) {
+    console.warn(`[pet-hit] setIgnoreMouseEvents 失败: ${e?.message ?? e}`)
+  }
+}
+
+ipcMain.on('set-interactive', (_e, { interactive }) => {
+  applyIgnoreMouse(interactive === true)
 })
 
 // ---------------------------------------------------------------------------

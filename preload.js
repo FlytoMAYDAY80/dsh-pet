@@ -14,4 +14,5 @@ contextBridge.exposeInMainWorld('pet', {
   playSound: (mode) => ipcRenderer.send('play-sound', mode),
   dragMove: (dx, dy) => ipcRenderer.send('drag-move', { dx, dy }),
   contextMenu: () => ipcRenderer.send('pet-context-menu'),
+  setInteractive: (interactive) => ipcRenderer.send('set-interactive', { interactive: !!interactive }),
 })

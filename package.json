@@ -9,6 +9,7 @@
     "start": "electron .",
     "smoke": "electron . --smoke",
     "shot": "electron . --shot .shots",
+    "hittest": "electron scripts/verify_hittest.js",
     "dist": "electron-builder --mac",
     "icon": "python3 scripts/gen_icon.py",
     "publish": "bash scripts/publish.sh"
